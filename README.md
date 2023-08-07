@@ -9,4 +9,4 @@ Build docker:
 
 Serve the API:
 
-`docker run -v $(pwd)/models/model:/app/model -p 8080:8080 veraai_subjectivity:latest`
+`docker run -dit -v $(pwd)/models/model:/app/model -p 80:8080 veraai_subjectivity:latest`
