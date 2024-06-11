@@ -26,7 +26,8 @@ model = ORTModelForSequenceClassification.from_pretrained('model', file_name='mo
                                                           )
 tokenizer = AutoTokenizer.from_pretrained('model')
 onnx_classifier = pipeline("text-classification", model=model, tokenizer=tokenizer)
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("xx_ent_wiki_sm")
+nlp.add_pipe('sentencizer')
 
 
 class Response(BaseModel):
@@ -34,6 +35,11 @@ class Response(BaseModel):
     sentence: str
     label: str
     score: float
+    start_index: int
+    end_index: int
+
+class Paragraph(BaseModel):
+    paragraph: str
 
 
 @app.get("/predict_subjectivity", response_model=Response)
@@ -44,15 +50,17 @@ def predict_subjectivity(sentence: str):
             "score": result["score"]}
 
 
-@app.get("/predict_subjectivity_on_texts", response_model=List[Response])
-def predict_subjectivity(paragraph: str):
-    doc = nlp(paragraph)
+@app.post("/predict_subjectivity_on_texts", response_model=List[Response])
+def predict_subjectivity(body: Paragraph):
+    doc = nlp(body.paragraph)
 
     results = []
     for sent_id, sentence in enumerate(doc.sents):
         result = onnx_classifier(sentence.text)[0]
         results.append({
             "id": sent_id,
+            "start_index": sentence.start_char,
+            "end_index": sentence.end_char,
             "sentence": sentence.text,
             "label": result["label"],
             "score": result["score"]
