@@ -25,7 +25,7 @@ model = ORTModelForSequenceClassification.from_pretrained('model', file_name='mo
                                                           label2id={"Not-subjective": 1, "Subjective": 0}
                                                           )
 tokenizer = AutoTokenizer.from_pretrained('model')
-onnx_classifier = pipeline("text-classification", model=model, tokenizer=tokenizer)
+onnx_classifier = pipeline("text-classification", model=model, tokenizer=tokenizer, truncation=True)
 nlp = spacy.load("xx_ent_wiki_sm")
 nlp.add_pipe('sentencizer')
 
